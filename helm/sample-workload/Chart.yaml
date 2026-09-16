@@ -1,0 +1,18 @@
+apiVersion: v2
+name: sample-workload
+description: >-
+  Demo/placeholder workload chart for deploying onto a freshly migrated EKS
+  cluster. Ships with a Deployment, Service, and HorizontalPodAutoscaler
+  configured with production-shaped defaults (resource requests/limits,
+  liveness/readiness probes) so it doubles as a reference pattern for real
+  application charts on this cluster.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - eks
+  - kubernetes
+  - demo
+  - reference-chart
+maintainers:
+  - name: Rakesh Chaudhari

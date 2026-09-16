@@ -1,0 +1,15 @@
+sample-workload has been deployed.
+
+This is a DEMO workload (image: {{ .Values.image.repository }}) used to
+prove out the deployment pattern (probes, resource limits, HPA, PDB,
+IRSA-ready service account) on your migrated EKS cluster -- swap
+values.yaml's image/probes/resources for your real application.
+
+To reach it locally:
+
+  kubectl port-forward svc/{{ include "sample-workload.fullname" . }} 8080:{{ .Values.service.port }}
+  curl http://localhost:8080/
+
+To check autoscaling status:
+
+  kubectl get hpa {{ include "sample-workload.fullname" . }}

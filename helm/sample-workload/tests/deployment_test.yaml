@@ -1,0 +1,56 @@
+suite: deployment
+templates:
+  - deployment.yaml
+tests:
+  - it: sets the demo image by default
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "nginxdemos/hello:plain-text"
+
+  - it: does not set spec.replicas when autoscaling is enabled (default)
+    asserts:
+      - notExists:
+          path: spec.replicas
+
+  - it: sets spec.replicas from replicaCount when autoscaling is disabled
+    set:
+      autoscaling.enabled: false
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: sets resource requests and limits
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 50m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 128Mi
+
+  - it: configures readiness and liveness probes
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 15
+
+  - it: runs as a non-root user by default
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+
+  - it: drops all capabilities by default
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          value: ["ALL"]

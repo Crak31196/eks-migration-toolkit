@@ -1,0 +1,95 @@
+# Default values for sample-workload.
+#
+# This chart deploys a small public demo image (nginxdemos/hello) so the
+# chart can be linted, rendered, and deployed end-to-end without any
+# custom application code -- it exists to demonstrate the Helm deployment
+# pattern (probes, resource limits, HPA, IRSA-friendly service account)
+# that a client's real application chart would follow.
+
+replicaCount: 2
+
+image:
+  # nginxdemos/hello is a small, well-known public demo image that serves a
+  # static "hello" page with request metadata -- used here purely as a
+  # stand-in workload.
+  repository: nginxdemos/hello
+  tag: "plain-text"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Set to true and add an eks.amazonaws.com/role-arn annotation to
+  # demonstrate IRSA wiring for a real workload that needs AWS API access.
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  fsGroup: 101
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false # nginx needs to write to /var/cache/nginx and /var/run
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+resources:
+  # Deliberately modest defaults suitable for a t3.medium-class node group;
+  # tune per-workload for real deployments.
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi
+
+probes:
+  readiness:
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  liveness:
+    path: /
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  # Spread replicas across nodes by default for basic HA -- soft
+  # preference, not a hard requirement, so scheduling still works on a
+  # small/dev-sized node group.
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
