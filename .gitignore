@@ -1,0 +1,38 @@
+# ---- Terraform ----
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+.terraform.tfstate.lock.info
+
+# Keep the dependency lock file tracked (standard Terraform convention) so
+# `terraform init` is reproducible for anyone cloning this repo.
+!.terraform.lock.hcl
+
+# ---- Helm ----
+*.tgz
+helm/**/charts/
+helm/**/Chart.lock
+
+# ---- Shell / env ----
+.env
+!.env.example
+
+# ---- OS / editor junk ----
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

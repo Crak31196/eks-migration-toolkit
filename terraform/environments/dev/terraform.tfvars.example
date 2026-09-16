@@ -1,0 +1,32 @@
+# Copy this file to terraform.tfvars and fill in real values before running
+# `terraform apply` against a real AWS account. Never commit terraform.tfvars
+# (it is gitignored) and never put real credentials in any .tfvars file --
+# authenticate via the AWS CLI / environment variables / an assumed role
+# instead (see the README "Deployment notes" section).
+
+aws_region  = "us-east-1"
+environment = "dev"
+name_prefix = "acme-eks-demo" # placeholder -- use your own project/client short name
+
+vpc_cidr_block = "10.42.0.0/16"
+azs            = ["us-east-1a", "us-east-1b"]
+
+public_subnet_cidrs  = ["10.42.0.0/24", "10.42.1.0/24"]
+private_subnet_cidrs = ["10.42.10.0/24", "10.42.11.0/24"]
+
+# Set to false while iterating on the plan to avoid NAT Gateway charges
+# (~$0.045/hr + data processing). Turn on before applying for real workloads
+# that need outbound internet from private subnets.
+enable_nat_gateway = true
+single_nat_gateway = true
+
+cluster_version     = "1.30"
+node_instance_types = ["t3.medium"]
+node_desired_size   = 2
+node_min_size       = 1
+node_max_size       = 4
+node_capacity_type  = "ON_DEMAND"
+
+# Restrict this to your office/VPN CIDR range for anything beyond a demo.
+endpoint_public_access = true
+public_access_cidrs    = ["0.0.0.0/0"]
