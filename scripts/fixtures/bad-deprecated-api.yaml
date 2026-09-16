@@ -1,0 +1,25 @@
+# DEMO DATA -- synthetic fixture for migration-readiness-check.sh.
+# extensions/v1beta1 was removed in Kubernetes 1.16 -- a manifest like this
+# would already be failing to apply on any current EKS control plane
+# version and needs updating to apps/v1 before/during migration.
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: demo-web-old-api
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: demo-web-old-api
+    spec:
+      containers:
+        - name: web
+          image: nginxdemos/hello:plain-text
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

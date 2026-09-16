@@ -1,0 +1,35 @@
+# DEMO DATA -- synthetic fixture for migration-readiness-check.sh.
+# Uses a hostPath volume, which ties the pod to a specific node's local
+# disk -- incompatible with EKS's replaceable managed node groups.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-web-hostpath
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-web-hostpath
+  template:
+    metadata:
+      labels:
+        app: demo-web-hostpath
+    spec:
+      containers:
+        - name: web
+          image: nginxdemos/hello:plain-text
+          volumeMounts:
+            - name: cache
+              mountPath: /var/cache/app
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+      volumes:
+        - name: cache
+          hostPath:
+            path: /mnt/data/app-cache
+            type: DirectoryOrCreate

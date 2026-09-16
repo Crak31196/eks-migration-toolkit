@@ -1,0 +1,23 @@
+# DEMO DATA -- synthetic fixture for migration-readiness-check.sh.
+# No resources block at all -- on a self-managed cluster with idle
+# capacity this often goes unnoticed, but it defeats the Cluster
+# Autoscaler's bin-packing model on EKS and risks noisy-neighbor issues.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-web-no-limits
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo-web-no-limits
+  template:
+    metadata:
+      labels:
+        app: demo-web-no-limits
+    spec:
+      containers:
+        - name: web
+          image: nginxdemos/hello:plain-text
+          ports:
+            - containerPort: 80
