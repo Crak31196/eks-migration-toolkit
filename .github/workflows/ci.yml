@@ -1,0 +1,95 @@
+name: CI
+
+# This workflow validates the toolkit statically -- it never runs
+# `terraform apply` and never touches a real AWS account (all Terraform
+# tests use mock_provider "aws" {}). See README.md "Deployment notes" for
+# what applying this for real requires.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform fmt / validate / test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: terraform fmt -check -recursive
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+
+      - name: terraform validate (vpc module)
+        working-directory: terraform/modules/vpc
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: terraform validate (eks module)
+        working-directory: terraform/modules/eks
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: terraform validate (dev environment)
+        working-directory: terraform/environments/dev
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: terraform test (mocked AWS provider, no real credentials)
+        working-directory: terraform/tests
+        run: |
+          terraform init -input=false
+          terraform test
+
+  helm:
+    name: Helm lint / template / kubeconform / unittest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: "v3.22.0"
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar -xz -C /usr/local/bin kubeconform
+          kubeconform -v
+
+      - name: Install helm-unittest plugin (best-effort)
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest || true
+
+      - name: helm lint
+        run: helm lint helm/sample-workload --strict
+
+      - name: Chart validation pipeline (lint + template + kubeconform [+ unittest])
+        run: ./helm/tests/validate.sh helm/sample-workload
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run shellcheck on all shell scripts
+        run: |
+          shopt -s globstar nullglob
+          scripts=(scripts/*.sh helm/tests/*.sh)
+          if [ ${#scripts[@]} -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          shellcheck "${scripts[@]}"
