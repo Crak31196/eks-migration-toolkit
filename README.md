@@ -168,7 +168,7 @@ All of the above are also run automatically in [`.github/workflows/ci.yml`](.git
 - **Cost awareness**: an EKS cluster (~$0.10/hr control plane, *demo/illustrative*), managed node group EC2 instances, and NAT gateway(s) (~$0.045/hr + data processing, *demo/illustrative*) all incur ongoing AWS charges from the moment you run `terraform apply` — set `enable_nat_gateway = false` while iterating on a plan to reduce cost, and always run `terraform destroy` on resources you no longer need.
 - A review of `public_access_cidrs` and IAM policies against your organization's actual security requirements before going anywhere near production.
 
-## What I'd build next for a client
+## What I'd build next
 
 - **GitOps delivery** with ArgoCD or Flux instead of manual `helm upgrade`, so cluster state is always reconciled from Git.
 - **Multi-cluster / multi-environment** Terraform workspaces (dev/staging/prod) with remote state and locking (S3 + DynamoDB).
@@ -183,5 +183,3 @@ Built by **Rakesh Chaudhari** — CKA & CKS certified, Microsoft Certified: Azur
 
 - LinkedIn: [linkedin.com/in/crak](https://www.linkedin.com/in/crak)
 - Email: [C.rakesh31196@gmail.com](mailto:C.rakesh31196@gmail.com)
-
-Available for freelance DevOps/cloud migration engagements — AWS & Azure, Kubernetes, Terraform, and CI/CD.
